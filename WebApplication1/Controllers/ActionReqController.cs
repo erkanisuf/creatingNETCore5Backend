@@ -11,7 +11,7 @@ using WebApplication1.Services;
 namespace WebApplication1.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class ActionReqController : ControllerBase
     {
         private readonly PersonDBContext _db;
@@ -19,10 +19,20 @@ namespace WebApplication1.Controllers
         {
             _db = db;
         }
+
+       
+
+
         [HttpGet]
         public object Index()
         {
             IEnumerable<PersonModel> objList = _db.PersonModel;
+            return objList;
+        }
+        [HttpGet]
+        public object Products()
+        {
+            IEnumerable<ProductModel> objList = _db.ProductModel;
             return objList;
         }
     }
