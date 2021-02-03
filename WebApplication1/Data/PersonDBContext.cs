@@ -14,6 +14,7 @@ namespace WebApplication1.Data
 
         public DbSet<PersonModel> PersonModel { get; set; }
         public DbSet<ProductModel> ProductModel { get; set; }
-        
+
+       
     }
 }

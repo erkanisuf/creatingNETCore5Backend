@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Services;
@@ -17,6 +18,7 @@ namespace WebApplication1.Controllers
         private readonly PersonDBContext _db;
         public ActionReqController(PersonDBContext db) // PersonDBContext is in DATA folder
         {
+           
             _db = db;
         }
 
@@ -32,8 +34,15 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public object Products()
         {
-            IEnumerable<ProductModel> objList = _db.ProductModel;
+              IEnumerable<ProductModel> objList = _db.ProductModel;
+            
+
             return objList;
+        }
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetMe() {
+            var values = await _db.ProductModel.Select(c => new { c.ProductPrice,c.ProductName }).ToListAsync(); // Entity Framework thins , this selects filed
+            return Ok(values);
         }
     }
     /*[Route("api/[controller]/[action]")] // when it has action can be http://localhost:5000/api/ActionReq/actiontwo othervise u cant have 2 get req.
