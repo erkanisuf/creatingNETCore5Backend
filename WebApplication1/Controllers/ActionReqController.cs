@@ -28,42 +28,86 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public object Index()
         {
-            IEnumerable<PersonModel> objList = _db.PersonModel;
+            IEnumerable<PersonModel> objList = _db.PersonModel; // http://localhost:13220/api/ActionReq/index
             return objList;
         }
         [HttpGet]
         public object Products()
         {
               IEnumerable<ProductModel> objList = _db.ProductModel;
-            
+            //http://localhost:13220/api/ActionReq/products
 
             return objList;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductModel>>> GetMe() {
+        public async Task<ActionResult<IEnumerable<ProductModel>>> GetMe() { // Task is for Async , ACtion result if have multiple result eg. View ,Json,File
             var values = await _db.ProductModel.Select(c => new { c.ProductPrice,c.ProductName }).ToListAsync(); // Entity Framework thins , this selects filed
+            //http://localhost:13220/api/ActionReq/getme
             return Ok(values);
         }
-    }
-    /*[Route("api/[controller]/[action]")] // when it has action can be http://localhost:5000/api/ActionReq/actiontwo othervise u cant have 2 get req.
-    [ApiController]
-    public class ActionReqController : ControllerBase
-    {
-        private readonly Items _itemServices; // Here Items comes from Items.cs ("public class Items")
 
-        public ActionReqController(Items itemServices)
-        {
-             _itemServices = itemServices;
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<ProductModel>>> Get(int id)
+        { // Task is for Async , ACtion result if have multiple result eg. View ,Json,File
+            var values = await _db.ProductModel.FindAsync(id); // http://localhost:13220/api/ActionReq/Get/1
+            if (values == null)
+            {
+                return NotFound();
+            }
+            return Ok(values);
         }
-        [HttpGet]
-        public async Task<ActionResult<string>> ActionOne()
+
+        [HttpPost]
+        public async Task<ActionResult> Post([FromBody] ProductModel product)
         {
-            return "ACtion One";
+            _db.ProductModel.Add(product);
+            await _db.SaveChangesAsync();
+            return Ok("Posted");
         }
-        [HttpGet]
-        public string ActionTwo()
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult> Change(long id, [FromBody]  ProductModel product)
         {
-            return "ACtion Two";
+
+            /*{
+                "Id" :2,
+            "productName": "Pineapledde",
+            "productPrice": 5
+              }*/ //From POstman should bne like this otherwise cant get body http://localhost:5000/api/ActionReq/Change/1/
+
+            if (id != product.Id)
+            {
+                return BadRequest();
+            }
+
+            _db.Entry(product).State = EntityState.Modified;
+
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+
+            return Ok("Succsess");
         }
-    }*/
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> delete(int id)
+        { // http://localhost:5000/api/ActionReq/delete/1/
+            var delitemsearch= await _db.ProductModel.FindAsync(id);
+            if (delitemsearch == null)
+            {
+                return NotFound();
+            }
+
+            _db.ProductModel.Remove(delitemsearch);
+            await _db.SaveChangesAsync();
+
+            return Ok("deleted");
+        }
+    }
+   
 }
