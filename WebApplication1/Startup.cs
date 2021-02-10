@@ -30,6 +30,7 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
 
             services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers();
@@ -46,7 +47,9 @@ namespace WebApplication1
                 app.UseDeveloperExceptionPage();
                
             }
-
+            app.UseCors(
+       options => options.WithOrigins("http://localhost:3000/").AllowAnyMethod()
+   );
             app.UseHttpsRedirection();
 
             app.UseRouting();
