@@ -75,7 +75,14 @@ namespace WebApplication1.Controllers
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activity/" + id);
             return response;
         }
+        [HttpGet]
+        public async Task<string> front10Eat() // places to eat
+        {
+            HttpClient client = new HttpClient();
 
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=10");
+            return response;
+        }
 
     }
 }
