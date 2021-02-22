@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApplication1.Data;
@@ -30,9 +32,17 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
 
-            services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            // ...
+       
+
+        services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllers();
             services.AddTransient<Items>(); // AddTransient must add and it takes Items from Services folder (kinda import)
            
@@ -47,13 +57,12 @@ namespace WebApplication1
                 app.UseDeveloperExceptionPage();
                
             }
-            app.UseCors(
-       options => options.WithOrigins("http://localhost:3000/").AllowAnyMethod()
-   );
+            app.UseCors("MyPolicy");
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
 
+           
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

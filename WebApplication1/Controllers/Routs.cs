@@ -26,7 +26,7 @@ namespace WebApplication1.Controllers
 
         }
         [HttpGet]
-        public  async Task<string> front10() // places
+        public  async Task<string> front10() // places 10
         {
             HttpClient client = new HttpClient();
 
@@ -43,7 +43,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public async Task<string> front10Events() // events
+        public async Task<string> front10Events() // events 10 
         {
             HttpClient client = new HttpClient();
 
@@ -60,7 +60,7 @@ namespace WebApplication1.Controllers
         }
 
         [HttpGet]
-        public async Task<string> front10Activities() // activities
+        public async Task<string> front10Activities() // activities 10
         {
             HttpClient client = new HttpClient();
 
@@ -76,13 +76,32 @@ namespace WebApplication1.Controllers
             return response;
         }
         [HttpGet]
-        public async Task<string> front10Eat() // places to eat
+        public async Task<string> front10Eat() // places to eat 10
         {
             HttpClient client = new HttpClient();
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=10");
             return response;
         }
+        /// Get all Items Route
+        [HttpGet]
+        public async Task<IActionResult> allPlacesToEat() // All Places to Eat
+        {
+            HttpClient client = new HttpClient();
+
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES");
+            return Ok( response);
+        }
+
+        public async Task<IActionResult> allEvents() // All Events
+        {
+            HttpClient client = new HttpClient();
+
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?language_filter=en");
+            return Ok(response);
+        }
+
+        ////////////
 
     }
 }
