@@ -6,6 +6,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
@@ -15,8 +17,8 @@ namespace WebApplication1.Controllers
     [ApiController]
     public class Routs : ControllerBase
     {
-        
 
+        HttpClient client = new HttpClient();
         [HttpGet]
         public  ActionResult<IEnumerable<string>> Get()
         {
@@ -28,15 +30,15 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public  async Task<string> front10() // places 10
         {
-            HttpClient client = new HttpClient();
+            
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?language_filter=en&limit=10");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?language_filter=en&limit=25");
             return response;
         }
         [HttpGet("{id}")]
         public async Task<string> PlacebyID(string id) // place by id
         {
-            HttpClient client = new HttpClient();
+            
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/place/"+id);
             return response;
@@ -45,15 +47,15 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<string> front10Events() // events 10 
         {
-            HttpClient client = new HttpClient();
+           
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?language_filter=en&limit=10");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?language_filter=en&limit=25");
             return response;
         }
         [HttpGet("{id}")]
         public async Task<string>eventID(string id) // event by id
         {
-            HttpClient client = new HttpClient();
+           
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/event/" + id);
             return response;
@@ -62,15 +64,15 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<string> front10Activities() // activities 10
         {
-            HttpClient client = new HttpClient();
+            
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activities/?language_filter=en&limit=10");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activities/?language_filter=en&limit=25");
             return response;
         }
         [HttpGet("{id}")]
         public async Task<string> activitybyID(string id) // ACtivity by Id
         {
-            HttpClient client = new HttpClient();
+           
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activity/" + id);
             return response;
@@ -78,30 +80,79 @@ namespace WebApplication1.Controllers
         [HttpGet]
         public async Task<string> front10Eat() // places to eat 10
         {
-            HttpClient client = new HttpClient();
+            
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=10");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=25");
             return response;
         }
         /// Get all Items Route
         [HttpGet]
         public async Task<IActionResult> allPlacesToEat() // All Places to Eat
         {
-            HttpClient client = new HttpClient();
+           
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=20&start=0");
             return Ok( response);
         }
-
+        [HttpGet]
         public async Task<IActionResult> allEvents() // All Events
         {
-            HttpClient client = new HttpClient();
+            
 
-            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?language_filter=en");
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?limit=20&start=0");
+            return Ok(response);
+        }
+        [HttpGet]
+        public async Task<IActionResult> allActivities() // All Events
+        {
+            
+
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activities/?limit=20&start=0");
+            return Ok(response);
+        }
+        public async Task<IActionResult> allPlaces() // All Events
+        {
+
+
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?limit=20&start=0");
             return Ok(response);
         }
 
+        //Pagination Fetching
+        [HttpPost]
+
+     
+        public async Task<IActionResult> pagingFetch([FromBody] FetchOptions content) // fetch places by value from body (pagination)
+        {
+            string response = "";
+            if (content.typeplace == "placetoeat")
+            {
+                response = await client.GetStringAsync($" http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit={content.limit}&start={content.start}");
+
+            }
+            else if (content.typeplace == "events") {
+                response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/events/?limit={content.limit}&start={content.start}");
+            } else if (content.typeplace == "activities") {
+                 response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?limit={content.limit}&start={content.start}");
+            }
+            else if (content.typeplace == "allplaces")
+            {
+                response  = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?limit={content.limit}&start={content.start}");
+            }
+
+
+
+            return Ok(response);
+        }
+        public class FetchOptions
+        {
+            public int limit { get; set; }
+            public int start { get; set; }
+            public string typeplace { get; set; }
+        }
         ////////////
+        ///
+
 
     }
 }
