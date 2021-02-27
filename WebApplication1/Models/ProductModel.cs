@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication1.Models
 {
+    // THIS FILE WILL BE DELETED  - used to test some CRUD
     public class ProductModel
     {
         [Key]
