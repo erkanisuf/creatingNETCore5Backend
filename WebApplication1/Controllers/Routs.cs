@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -28,62 +30,114 @@ namespace WebApplication1.Controllers
 
         }
         [HttpGet]
-        public  async Task<string> front10() // places 10
+        public  async Task<IActionResult> front10() // places 10
         {
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?language_filter=en&limit=25");
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
+           
+
         }
         [HttpGet("{id}")]
-        public async Task<string> PlacebyID(string id) // place by id
+        public async Task<IActionResult> PlacebyID(string id) // place by id
         {
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/place/"+id);
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
 
         [HttpGet]
-        public async Task<string> front10Events() // events 10 
+        public async Task<IActionResult> front10Events() // events 10 
         {
            
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?language_filter=en&limit=25");
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         [HttpGet("{id}")]
-        public async Task<string>eventID(string id) // event by id
+        public async Task<IActionResult>eventID(string id) // event by id
         {
            
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/event/" + id);
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
 
         [HttpGet]
-        public async Task<string> front10Activities() // activities 10
+        public async Task<IActionResult> front10Activities() // activities 10
         {
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activities/?language_filter=en&limit=25");
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         [HttpGet("{id}")]
-        public async Task<string> activitybyID(string id) // ACtivity by Id
+        public async Task<IActionResult> activitybyID(string id) // ACtivity by Id
         {
            
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activity/" + id);
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
+
         [HttpGet]
-        public async Task<string> front10Eat() // places to eat 10
+        public async Task<IActionResult> front10Eat() // places to eat 10
         {
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=25");
-            return response;
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         /// Get all Items Route
         [HttpGet]
@@ -92,7 +146,14 @@ namespace WebApplication1.Controllers
            
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit=20&start=0");
-            return Ok( response);
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         [HttpGet]
         public async Task<IActionResult> allEvents() // All Events
@@ -100,7 +161,14 @@ namespace WebApplication1.Controllers
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/events/?limit=20&start=0");
-            return Ok(response);
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         [HttpGet]
         public async Task<IActionResult> allActivities() // All Events
@@ -108,14 +176,28 @@ namespace WebApplication1.Controllers
             
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/activities/?limit=20&start=0");
-            return Ok(response);
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         public async Task<IActionResult> allPlaces() // All Events
         {
 
 
             string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?limit=20&start=0");
-            return Ok(response);
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
 
         //Pagination Fetching
@@ -142,7 +224,14 @@ namespace WebApplication1.Controllers
 
 
 
-            return Ok(response);
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
         }
         public class FetchOptions
         {
