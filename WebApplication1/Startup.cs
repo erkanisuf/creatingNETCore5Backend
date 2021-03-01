@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
@@ -40,13 +41,19 @@ namespace WebApplication1
             }));
 
             // ...
-       
 
-        services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddAutoMapper(typeof(Startup));
+
+            services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<PersonDBContext>();
             services.AddControllers();
             services.AddTransient<Items>(); // AddTransient must add and it takes Items from Services folder (kinda import)
-           
+            
+
+
         }
+        
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -62,7 +69,7 @@ namespace WebApplication1
             app.UseStaticFiles();
             app.UseRouting();
 
-           
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
