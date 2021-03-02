@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApplication1.Models;
 
@@ -17,12 +19,20 @@ namespace WebApplication1.Controllers
     {
 
         private readonly UserManager<User> _userManager; // UserManager From ASP Identity Packet
+        private readonly SignInManager<User> _signInManager; // SignIN from Identity Pack
         private readonly IMapper _mapper;
         
-        public UserController(UserManager<User> userManager, IMapper mapper)
+        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper )
         {
             _userManager = userManager;
+            _signInManager = signInManager;
             _mapper = mapper;
+        }
+
+        public class RegistrationResponseDto // sends errors in list
+        {
+            public bool IsSuccessfulRegistration { get; set; }
+            public IEnumerable<string> Errors { get; set; }
         }
         // GET: UserController
 
@@ -31,7 +41,7 @@ namespace WebApplication1.Controllers
             return View();
         }
 
-        // GET: http://localhost:5000/api/user/register - Register
+        // GET: http://localhost:5000/api/user/register - Register Route
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] UserRegisterModel newuser)
         {
@@ -45,37 +55,67 @@ namespace WebApplication1.Controllers
             {
                 var errors = result.Errors.Select(e => e.Description);
 
-                IEnumerable<string> errorz = errors;
-                /*return BadRequest(new RegistrationResponseDto { Errors = errors });*/
-                return BadRequest(errorz);
+
+                return BadRequest(new RegistrationResponseDto { Errors = errors });
+               
             }
             return Ok("register");
         }
 
-        public class RegistrationResponseDto
+
+        // Login Route
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(LoginModel user)
         {
-            public bool IsSuccessfulRegistration { get; set; }
-            public IEnumerable<string> Errors { get; set; }
-        }
-        // GET: UserController/Create
-        public ActionResult Create()
-        {
-            return View();
+            if (ModelState.IsValid)
+            {
+                var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, false);
+
+                if (result.Succeeded)
+                {
+
+                    return Ok("loggedin");
+                }
+                else {
+
+                   
+                    return BadRequest("Invalid username or password");
+                }
+                
+                
+               /* ModelState.AddModelError(string.Empty, "Invalid Login Attempt");*/
+               
+            }
+            /* var usera = _userManager.GetUserAsync(HttpContext.User);
+             return Ok(usera);*/
+            return Ok();
         }
 
-        // POST: UserController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+
+
+        // THIS gets current logged user with session
+        [HttpGet]
+        public async Task<IActionResult> currentUser()
         {
-            try
+            var usera = await _userManager.GetUserAsync(HttpContext.User);
+            if (usera != null)
             {
-                return RedirectToAction(nameof(Index));
+
+                return Ok(usera.Email);
             }
-            catch
-            {
-                return View();
+            else {
+                return BadRequest("Not logged in");
             }
+            
+        }
+
+        // Logout Route
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return Ok("Logged out");
         }
 
         // GET: UserController/Edit/5
