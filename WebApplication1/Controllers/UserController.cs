@@ -7,12 +7,14 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WebApplication1.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApplication1.Controllers
 {
@@ -24,12 +26,16 @@ namespace WebApplication1.Controllers
         private readonly UserManager<User> _userManager; // UserManager From ASP Identity Packet
         private readonly SignInManager<User> _signInManager; // SignIN from Identity Pack
         private readonly IMapper _mapper;
-        
-        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper )
+
+
+        private IConfiguration Configuration { get; } // So i can get strings from appsettings.json
+       
+        public UserController(UserManager<User> userManager, SignInManager<User> signInManager, IMapper mapper, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mapper = mapper;
+            Configuration = configuration; // for appsettings.json 
         }
 
         public class RegistrationResponseDto // sends errors in list
@@ -39,6 +45,7 @@ namespace WebApplication1.Controllers
 
             public string Email { get; set; }
             public string Token { get; set; }
+            public string TokenExpires { get; set; }
         }
        
         // GET: UserController
@@ -81,21 +88,25 @@ namespace WebApplication1.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(user.Email, user.Password, user.RememberMe, false);
-
+                string secretkey = Configuration.GetValue<string>("JWTSettings:mySecret");
                 if (result.Succeeded)
                 {
-                    
-                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qsecurityKey@3333"));
+                    var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretkey));
                     var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-                    var tokenOptions = new JwtSecurityToken(issuer: "https://localhost:5000/",
+                    List<Claim> myclaims = new List<Claim>();
+                    myclaims.Add(new Claim(ClaimTypes.Email, user.Email));
+                    myclaims.Add(new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(1).ToString()));
+                    var tokenOptions = new JwtSecurityToken(
+                        issuer: "https://localhost:3000/",
                         audience: "https://localhost:5000/",
-                        claims: new List<Claim>(),
-                        expires: DateTime.Now.AddMinutes(5),
-                    signingCredentials: signingCredentials);
+                        claims: myclaims,
+                        expires: DateTime.Now.AddMinutes(1),
+                         signingCredentials: signingCredentials);
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
                     /*return Ok(new RegistrationResponseDto { IsSuccs=true ,Email = user.Email,Token=tokenString });*/
-                    return Ok(new { Token = tokenString });
+                    /*return Ok(new { Token = tokenString });*/
+                    return Ok(new RegistrationResponseDto { IsSuccs = true,Email=user.Email, Token=tokenString , TokenExpires = DateTime.Now.AddMinutes(1).ToString() });
                 }
                 else {
                     IEnumerable<string> error = new List<string> { "Invalid Username or Password" };
@@ -138,57 +149,25 @@ namespace WebApplication1.Controllers
             return Ok("Logged out");
         }
 
-        [HttpGet]
         [Authorize]
+        [HttpGet]
+      
         public async Task<IActionResult> testva()
         {
-            var usera = await _userManager.GetUserAsync(HttpContext.User);
-            if (usera != null)
-            {
-
-                return Ok(new RegistrationResponseDto { Email = usera.Email, IsSuccs = true });
-            }
-            else
-            {
-                return Ok(new RegistrationResponseDto { Email = "nope", IsSuccs = true });
-            }
             
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var expiration = claimsIdentity.FindFirst(ClaimTypes.Expiration)?.Value;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
+            if (userId == "erkanisuf@gmail.com")
+            {
+                return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId, TokenExpires = expiration });
+            }
+            else {
+                return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId+ "neeeeee", TokenExpires = expiration });
+            }
+
         }
 
-        // POST: UserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: UserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+       
     }
 }

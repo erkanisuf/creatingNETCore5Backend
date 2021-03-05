@@ -38,15 +38,16 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            services.AddCors(o => o.AddPolicy("CorsPolicy", builder =>
             {
+
                 builder.AllowAnyOrigin()
                        .AllowAnyMethod()
                        .AllowAnyHeader();
             }));
-
+            services.AddControllers();
             // ...
-           
+
             services.AddAutoMapper(typeof(Startup));
 
             services.AddDbContext<PersonDBContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
@@ -55,6 +56,7 @@ namespace WebApplication1
 
 
             var jwtSettings = Configuration.GetSection("JwtSettings");
+            string secretkey = Configuration.GetValue<string>("JWTSettings:mySecret");
             services.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,18 +65,19 @@ namespace WebApplication1
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero, // Makes sure that after time mins token doesnt work anymore
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = "http://localhost:5000/",
+                    ValidIssuer = "http://localhost:3000/",
                     ValidAudience = "http://localhost:5000/",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qsecurityKey@3333"))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretkey))
                 };
             });
 
 
-            services.AddControllers();
+            
             services.AddTransient<Items>(); // AddTransient must add and it takes Items from Services folder (kinda import)
             
 
@@ -85,20 +88,18 @@ namespace WebApplication1
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            
+            app.UseCors("CorsPolicy");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                
             }
-            app.UseCors("MyPolicy");
+           
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthentication();
-
-          
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
