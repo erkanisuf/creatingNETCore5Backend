@@ -151,6 +151,17 @@ namespace WebApplication1.Controllers
 
         [Authorize]
         [HttpGet]
+        // Checks users token and then looks inside the token and gets the name and other information.
+        public async Task<IActionResult> GetUserByToken()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var expiration = claimsIdentity.FindFirst(ClaimTypes.Expiration)?.Value;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
+            return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId, TokenExpires = expiration });
+        }
+
+        [Authorize]
+        [HttpGet]
       
         public async Task<IActionResult> testva()
         {
@@ -158,13 +169,10 @@ namespace WebApplication1.Controllers
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var expiration = claimsIdentity.FindFirst(ClaimTypes.Expiration)?.Value;
             var userId = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
-            if (userId == "erkanisuf@gmail.com")
-            {
+            
+            
                 return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId, TokenExpires = expiration });
-            }
-            else {
-                return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId+ "neeeeee", TokenExpires = expiration });
-            }
+           
 
         }
 

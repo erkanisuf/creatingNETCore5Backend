@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
 namespace WebApplication1.Migrations
 {
     [DbContext(typeof(PersonDBContext))]
-    partial class PersonDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210306203633_ReviesModel")]
+    partial class ReviesModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,23 +195,15 @@ namespace WebApplication1.Migrations
                         .HasColumnType("int")
                         .UseIdentityColumn();
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("comment")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("placeId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("rating")
+                    b.Property<int?>("user_reviewId")
                         .HasColumnType("int");
 
-                    b.Property<string>("writtenBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("user_reviewId");
 
                     b.ToTable("ReviewsModel");
                 });
@@ -285,6 +279,33 @@ namespace WebApplication1.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("WebApplication1.Models.UserReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<byte[]>("Created_AT")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("comment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("writtenBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserReview");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -334,6 +355,15 @@ namespace WebApplication1.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("WebApplication1.Models.ReviewsModel", b =>
+                {
+                    b.HasOne("WebApplication1.Models.UserReview", "user_review")
+                        .WithMany()
+                        .HasForeignKey("user_reviewId");
+
+                    b.Navigation("user_review");
                 });
 #pragma warning restore 612, 618
         }

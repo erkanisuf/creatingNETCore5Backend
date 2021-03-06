@@ -58,12 +58,23 @@ namespace WebApplication1.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody] ProductModel product)
+        public async Task<ActionResult> Post([FromBody] ReviewsModel product)
         {
-            _db.ProductModel.Add(product);
+            _db.ReviewsModel.Add(product);
             await _db.SaveChangesAsync();
-            return Ok("Posted");
+            return Ok(product);
         }
+      /*  [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<ReviewsModel>>> GetReviewsByID(int id)
+        { // Task is for Async , ACtion result if have multiple result eg. View ,Json,File
+            *//*var values = await _db.ReviewsModel.FindAsync(id);
+            var gg = values.user_review = new UserReview();
+
+
+
+
+            return Ok(gg);*//*
+        }*/
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Change(long id, [FromBody]  ProductModel product)
