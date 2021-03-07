@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using WebApplication1.Data;
 using WebApplication1.Models;
 using WebApplication1.Services;
@@ -60,21 +62,45 @@ namespace WebApplication1.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] ReviewsModel product)
         {
-            _db.ReviewsModel.Add(product);
-            await _db.SaveChangesAsync();
-            return Ok(product);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("Check all fields !");
+            }
+
+            var values = _db.ReviewsModel.Where(b => b.placeId == product.placeId).Where(b=>b.writtenBy == product.writtenBy);
+
+            if (values.Any())
+            {
+                return BadRequest("Has already reviewed it!!!");
+            }
+            else {
+                var additem = _db.ReviewsModel.Add(product);
+                var result = await _db.SaveChangesAsync();
+                return Ok(result);
+            }
+
+
+            /* "placeId":"asdf",
+            "writtenBy":"dadaman",
+            "rating":41,
+            "comment":"eghhehee",
+            "CreatedDate": "2019-01-06T17:16:40"*/ //This is the JSON From postman ,ISO 8601
+
+
+
+
         }
-      /*  [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<ReviewsModel>>> GetReviewsByID(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<IEnumerable<ReviewsModel>>> GetReviewsByID(string id)
         { // Task is for Async , ACtion result if have multiple result eg. View ,Json,File
-            *//*var values = await _db.ReviewsModel.FindAsync(id);
-            var gg = values.user_review = new UserReview();
+            var values = _db.ReviewsModel.Where(b => b.placeId == id)
+                    ;
+            
 
 
-
-
-            return Ok(gg);*//*
-        }*/
+            return Ok(values);
+        }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Change(long id, [FromBody]  ProductModel product)
