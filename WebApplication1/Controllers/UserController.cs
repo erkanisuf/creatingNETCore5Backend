@@ -95,12 +95,12 @@ namespace WebApplication1.Controllers
                     var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
                     List<Claim> myclaims = new List<Claim>();
                     myclaims.Add(new Claim(ClaimTypes.Email, user.Email));
-                    myclaims.Add(new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(1).ToString()));
+                    myclaims.Add(new Claim(ClaimTypes.Expiration, DateTime.Now.AddMinutes(60).ToString()));
                     var tokenOptions = new JwtSecurityToken(
                         issuer: "https://localhost:3000/",
                         audience: "https://localhost:5000/",
                         claims: myclaims,
-                        expires: DateTime.Now.AddMinutes(1),
+                        expires: DateTime.Now.AddMinutes(60),
                          signingCredentials: signingCredentials);
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
