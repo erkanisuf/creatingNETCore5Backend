@@ -104,8 +104,6 @@ namespace WebApplication1.Controllers
                          signingCredentials: signingCredentials);
                     var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
 
-                    /*return Ok(new RegistrationResponseDto { IsSuccs=true ,Email = user.Email,Token=tokenString });*/
-                    /*return Ok(new { Token = tokenString });*/
                     return Ok(new RegistrationResponseDto { IsSuccs = true,Email=user.Email, Token=tokenString , TokenExpires = DateTime.Now.AddMinutes(1).ToString() });
                 }
                 else {
@@ -114,40 +112,16 @@ namespace WebApplication1.Controllers
                     return BadRequest(new RegistrationResponseDto { IsSuccs = false, Errors = error });
                 }
                 
-                
-               /* ModelState.AddModelError(string.Empty, "Invalid Login Attempt");*/
+               
                
             }
-            /* var usera = _userManager.GetUserAsync(HttpContext.User);
-             return Ok(usera);*/
+   
             return Ok();
         }
 
 
 
-        // THIS gets current logged user with session
-        [HttpGet]
-        public async Task<IActionResult> currentUser()
-        {
-            var usera = await _userManager.GetUserAsync(HttpContext.User);
-            if (usera != null)
-            {
 
-                return Ok(usera.Email);
-            }
-            else {
-                return BadRequest("Not logged in");
-            }
-            
-        }
-
-        // Logout Route
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return Ok("Logged out");
-        }
 
         [Authorize]
         [HttpGet]
@@ -160,21 +134,7 @@ namespace WebApplication1.Controllers
             return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId, TokenExpires = expiration });
         }
 
-        [Authorize]
-        [HttpGet]
-      
-        public async Task<IActionResult> testva()
-        {
-            
-            var claimsIdentity = User.Identity as ClaimsIdentity;
-            var expiration = claimsIdentity.FindFirst(ClaimTypes.Expiration)?.Value;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.Email)?.Value;
-            
-            
-                return Ok(new RegistrationResponseDto { IsSuccs = true, Email = userId, TokenExpires = expiration });
-           
 
-        }
 
        
     }

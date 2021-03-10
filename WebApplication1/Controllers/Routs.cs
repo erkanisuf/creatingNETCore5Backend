@@ -21,6 +21,12 @@ namespace WebApplication1.Controllers
     {
 
         HttpClient client = new HttpClient();
+        public class FetchOptions // Class for the pagination
+        {
+            public int limit { get; set; }
+            public int start { get; set; }
+            public string typeplace { get; set; }
+        }
         [HttpGet]
         public  ActionResult<IEnumerable<string>> Get()
         {
@@ -171,7 +177,7 @@ namespace WebApplication1.Controllers
             }
         }
         [HttpGet]
-        public async Task<IActionResult> allActivities() // All Events
+        public async Task<IActionResult> allActivities() // All ACtivities
         {
             
 
@@ -233,14 +239,61 @@ namespace WebApplication1.Controllers
                 return Ok(response);
             }
         }
-        public class FetchOptions
-        {
-            public int limit { get; set; }
-            public int start { get; set; }
-            public string typeplace { get; set; }
-        }
+
         ////////////
         ///
+
+        [HttpGet]
+        public async Task<IActionResult> NearbyPlaces() // DIstance Nearby Places
+        {
+
+                                                                                                                  //60.26429609999999,25.108021299999997    ,100&limit=
+            string response = await client.GetStringAsync("http://open-api.myhelsinki.fi/v1/places/?distance_filter=60.26429609999999%2C25.108021299999997%2C100&limit=20");
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
+        }
+        //Pagination FetchingWIth NearbY Result
+        [HttpPost]
+
+
+        public async Task<IActionResult> NearbyFetchPagination([FromBody] FetchOptions content) // fetch places by value from body (pagination)
+        {
+            string response = "";
+            if (content.typeplace == "placetoeat")
+            {
+                response = await client.GetStringAsync($" http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit={content.limit}&start={content.start}");
+
+            }
+            else if (content.typeplace == "events")
+            {
+                response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/events/?limit={content.limit}&start={content.start}");
+            }
+            else if (content.typeplace == "activities")
+            {
+                response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?limit={content.limit}&start={content.start}");
+            }
+            else if (content.typeplace == "allplaces")
+            {
+                response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?limit={content.limit}&start={content.start}");
+            }
+
+
+
+            if (response == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                return Ok(response);
+            }
+        }
 
 
     }
