@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -218,9 +219,12 @@ namespace WebApplication1.Controllers
                 response = await client.GetStringAsync($" http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&limit={content.limit}&start={content.start}");
 
             }
-            else if (content.typeplace == "events") {
+            else if (content.typeplace == "events")
+            {
                 response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/events/?limit={content.limit}&start={content.start}");
-            } else if (content.typeplace == "activities") {
+            }
+            else if (content.typeplace == "activities")
+            {
                 response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?limit={content.limit}&start={content.start}");
             }
             else if (content.typeplace == "allplaces")
@@ -242,11 +246,12 @@ namespace WebApplication1.Controllers
 
         ////////////
         ///
-            //GEO LOCATION class for nearby items from frontend
-                public class GeoLocation {
-                 public string latitude { get; set; }
-                public  string longitude { get; set; }
-                public  string typeplace { get; set; }
+        //GEO LOCATION class for nearby items from frontend
+        public class GeoLocation
+        {
+            public string latitude { get; set; }
+            public string longitude { get; set; }
+            public string typeplace { get; set; }
             public int limit { get; set; }
             public int start { get; set; }
         }
@@ -262,12 +267,13 @@ namespace WebApplication1.Controllers
             {
                 response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?tags_search=RESTAURANTS%20%26%20CAFES&distance_filter={location.latitude}%2C{location.longitude}%2C100&limit=20");
 
-            } else if (location.typeplace == "allplaces")
-              
-                {
-                    response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?distance_filter={location.latitude}%2C{location.longitude}%2C100&limit=20");
+            }
+            else if (location.typeplace == "allplaces")
 
-                }
+            {
+                response = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?distance_filter={location.latitude}%2C{location.longitude}%2C100&limit=20");
+
+            }
             else if (location.typeplace == "activities")
 
             {
@@ -281,7 +287,7 @@ namespace WebApplication1.Controllers
 
             }
 
-            
+
             if (response == null)
             {
                 return NotFound();
@@ -297,7 +303,7 @@ namespace WebApplication1.Controllers
 
         public async Task<IActionResult> NearbyFetchPagination([FromBody] GeoLocation location) // fetch places by value from body (pagination)
         {
-            
+
             string response = "";
             if (location.typeplace == "placetoeat")
             {
@@ -332,6 +338,36 @@ namespace WebApplication1.Controllers
             {
                 return Ok(response);
             }
+        }
+       
+        public class TagsModel
+        {
+
+            public TagPlaces tags { get; set; }
+
+        }
+        
+
+        
+
+
+        [HttpGet]
+
+        // TAGS PLACES
+        public async Task<IActionResult> test()
+        {
+            // If some wierd JSON
+            /*JObject root = JObject.Parse(result);
+            JObject tags = root["tags"] as JObject;
+            string matko11 = tags["matko1:1"].Value<string>();*/
+            //List<string> mytagsList = new List<string>();
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?limit=200");
+
+            var mytags = JsonConvert.DeserializeObject<TagsModel>(result);
+        
+            
+           
+            return Ok(mytags);
         }
 
 
