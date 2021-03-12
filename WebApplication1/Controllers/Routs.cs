@@ -363,6 +363,28 @@ namespace WebApplication1.Controllers
             return Ok(mytags);
         }
 
+        [HttpGet("{id}")]
+
+        // TAGS PLACES
+        public async Task<IActionResult> searchTagsallplaces(string id)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?tags_search={id}");
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> searchTagsEvents(string id)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/events/?tags_search={id}");
+            return Ok(result);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> searchTagsActivities(string id)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?tags_search={id}");
+            return Ok(result);
+        }
+
 
     }
+
 }
