@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -339,31 +340,23 @@ namespace WebApplication1.Controllers
                 return Ok(response);
             }
         }
-       
-        public class TagsModel
-        {
-
-            public TagPlaces tags { get; set; }
-
-        }
-        
-
-        
 
 
-        [HttpGet]
+
+
+        [HttpGet("{id}")]
 
         // TAGS PLACES
-        public async Task<IActionResult> test()
+        public async Task<IActionResult> getTags(string id)
         {
-            // If some wierd JSON
+            // If some wierd JSON - This mig also be option for future jsons.
             /*JObject root = JObject.Parse(result);
             JObject tags = root["tags"] as JObject;
             string matko11 = tags["matko1:1"].Value<string>();*/
-            //List<string> mytagsList = new List<string>();
-            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?limit=200");
-
-            var mytags = JsonConvert.DeserializeObject<TagsModel>(result);
+           
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/{id}/?limit=6000");
+            var mytags = JsonConvert.DeserializeObject<JSONTags>(result);
+            //JSONTags Model fixes the issue ,not need hardcore every Json property
         
             
            
