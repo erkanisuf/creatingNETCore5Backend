@@ -346,7 +346,7 @@ namespace WebApplication1.Controllers
 
         [HttpGet("{id}")]
 
-        // TAGS PLACES
+        // TAGS Values
         public async Task<IActionResult> getTags(string id)
         {
             // If some wierd JSON - This mig also be option for future jsons.
@@ -362,7 +362,7 @@ namespace WebApplication1.Controllers
            
             return Ok(mytags);
         }
-
+        //ROUTES Search by Tags (NON distance)
         [HttpGet("{id}")]
 
         // TAGS PLACES
@@ -383,8 +383,28 @@ namespace WebApplication1.Controllers
             var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?tags_search={id}");
             return Ok(result);
         }
+        //ROUTES Search by Tags (Distance)
 
+        [HttpPost("{id}")]
 
+        // TAGS PLACES
+        public async Task<IActionResult> searchTagsallplacesDistance(string id,[FromBody] GeoLocation location)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/places/?tags_search={id}&distance_filter={location.latitude}%2C{location.longitude}%2C100&start=0");
+            return Ok(result);
+        }
+        [HttpPost("{id}")]
+        public async Task<IActionResult> searchTagsEventsDistance(string id, [FromBody] GeoLocation location)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/events/?tags_search={id}&distance_filter={location.latitude}%2C{location.longitude}%2C100&start=0");
+            return Ok(result);
+        }
+        [HttpPost("{id}")]
+        public async Task<IActionResult> searchTagsActivitiesDistance(string id, [FromBody] GeoLocation location)
+        {
+            var result = await client.GetStringAsync($"http://open-api.myhelsinki.fi/v1/activities/?tags_search={id}&distance_filter={location.latitude}%2C{location.longitude}%2C100&start=0");
+            return Ok(result);
+        }
     }
 
 }
