@@ -14,8 +14,7 @@ namespace WebApplication1.Data
         }
 
         // THESE MODELS WILL BE DELETED - used to test some CRUD
-        public DbSet<PersonModel> PersonModel { get; set; }
-        public DbSet<ProductModel> ProductModel { get; set; }
+        
 
         public DbSet<ReviewsModel> ReviewsModel { get; set; }
        

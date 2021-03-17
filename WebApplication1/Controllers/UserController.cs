@@ -139,50 +139,50 @@ namespace WebApplication1.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] string email)
         {
             //
-            var user = await _userManager.FindByNameAsync(email);
-            string kur = user.Id;
-            /*if (user == null)
-            {
-                // Don't reveal that the user does not exist or is not confirmed
-                return Ok(new RegistrationResponseDto { IsSuccs = true, Email = email })
-            }*/
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            string apiKey = Configuration.GetValue<string>("SendGrid:mySecret");
-            /*var apiKey = Environment.GetEnvironmentVariable("NAME_OF_THE_ENVIRONMENT_VARIABLE_FOR_YOUR_SENDGRID_KEY");*/ // Other possible way to use
-            var client = new SendGridClient(apiKey);
-            var from = new EmailAddress("djerimixer2260@abv.bg", "Helsinki Guide App");
-            var subject = "Sending with SendGrid is Fun";
-            var to = new EmailAddress(email, "Password reset - Helsinki Guide App");
+
+            if (email == "" || email == null) {
+                return BadRequest();
+            }
+            var user = await _userManager.FindByNameAsync(email); // User from DB with the email string finds it
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user); //makes token of it and puts the email inside token
+            string apiKey = Configuration.GetValue<string>("SendGrid:mySecret"); // Setup SendGrid with Key
+            string frontendHost = Configuration.GetValue<string>("SendGrid:frontendHost"); // Setup SendGrid - this is frontend domain
+             var client = new SendGridClient(apiKey); //Setup
+            var from = new EmailAddress("djerimixer2260@abv.bg", "Helsinki Guide App"); // Email From  and Title
+            var subject = "Your password reset link";
+            var to = new EmailAddress(email, "Password reset - Helsinki Guide App"); // TO who to send it
             var plainTextContent = "Click on the button and after that add your new password";
             var htmlContent = "<h1>Click on the button and after that add your new password</h1>" +
-                "<br /><button style='background-color:#0093e9;border:none;color:white;width:200px;padding:25px;cursor:Pointer;'>" +
-                "Click Here</button> " +
-                $"{token}";
+                $"<br /><a type='button' href='{frontendHost}/{token}' target='_blank' style='background-color:#0093e9;border:none;color:white;width:200px;padding:25px;cursor:Pointer;'>" +
+            "Click Here</a> ";
 
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await client.SendEmailAsync(msg);
-            return Ok(new RegistrationResponseDto { IsSuccs = true, Email = kur });
+            return Ok(new RegistrationResponseDto { IsSuccs = true,Email = email });
 
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        // Checks users token and then looks inside the token and gets the name and other information.
+        [HttpPost]        
+       
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel resetPasswordModel)
         {
             //check if valid model
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var user = await _userManager.FindByEmailAsync(resetPasswordModel.Email);
             var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPasswordModel.Token, resetPasswordModel.Password);
 
-            //Do this more elegant way to response the error array!
             if (!resetPassResult.Succeeded)
             {
-                List<string> kur = new List<string>();
+                List<string> listErrors = new List<string>();
                 foreach (var error in resetPassResult.Errors)
                 {
                     ModelState.TryAddModelError(error.Code, error.Description);
-                    kur.Add(error.Description);
+                    listErrors.Add(error.Description);
                 }
-                return Ok(kur);
+                return Ok(new RegistrationResponseDto { IsSuccs = false, Errors=listErrors });
             }
             else { return Ok(new RegistrationResponseDto { IsSuccs = true, Email = user.Email, }); }
         }
